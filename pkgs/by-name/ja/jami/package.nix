@@ -12,7 +12,7 @@
   alsa-lib,
   asio,
   dbus,
-  sdbus-cpp,
+  sdbus-cpp_2,
   fmt,
   gmp,
   gnutls,
@@ -194,7 +194,7 @@ stdenv.mkDerivation rec {
       asio
       dbus
       dhtnet
-      sdbus-cpp
+      sdbus-cpp_2
       fmt
       ffmpeg_6
       gmp
@@ -257,9 +257,12 @@ stdenv.mkDerivation rec {
     git
     python3
     qt6Packages.qttools # for translations
+    autoreconfHook
+    perl
   ];
 
   buildInputs = [
+    # Client dependencies
     ffmpeg_6
     html-tidy
     hunspell
@@ -268,6 +271,34 @@ stdenv.mkDerivation rec {
     networkmanager
     qrencode
     zxing-cpp
+    # Daemon dependencies (needed when built as subdirectory)
+    alsa-lib
+    asio
+    dbus
+    dhtnet
+    sdbus-cpp_2
+    fmt
+    gmp
+    gnutls
+    llhttp
+    libjack2
+    jsoncpp
+    libarchive
+    libgit2
+    libnatpmp
+    libpulseaudio
+    libupnp
+    msgpack-cxx
+    opendht-jami
+    openssl
+    pjsip-jami
+    restinio
+    secp256k1
+    speex
+    udev
+    webrtc-audio-processing_0_3
+    yaml-cpp
+    zlib
   ]
   ++ (
     with qt6Packages;
@@ -284,7 +315,11 @@ stdenv.mkDerivation rec {
     ++ lib.optionals withWebengine [ qtwebengine ]
   );
 
-  cmakeFlags = lib.optionals (!withWebengine) [ "-DWITH_WEBENGINE=false" ];
+  cmakeFlags = [
+    "-DENABLE_CONTRIB=Off"
+    "-DENABLE_JAMICORE_AS_SUBDIR=Off"
+  ]
+  ++ lib.optionals (!withWebengine) [ "-DWITH_WEBENGINE=false" ];
 
   qtWrapperArgs = [
     # With wayland the titlebar is not themed and the wmclass is wrong.
